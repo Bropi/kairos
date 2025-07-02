@@ -1,11 +1,12 @@
 extends Node2D
 
-var selected_unit := null
+var selected_unit = null
+@onready var tile_map_layer: TileMapLayer = $"../TileMapLayer"
 
 func _input(event):
 	if event is InputEventMouseButton and event.pressed:
 		var clicked_pos = get_global_mouse_position()
-		var tilemap = $"../TileMap"
+		var tilemap = tile_map_layer
 		var tile_pos = tilemap.local_to_map(clicked_pos)
 
 		if selected_unit:
