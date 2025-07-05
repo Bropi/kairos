@@ -1,21 +1,143 @@
 extends CharacterBody2D
 
-@export var is_player: bool = true
-@export var move_range := 3
-@export var grid_pos := Vector2i.ZERO
+@onready var tile_map_layer_selected: TileMapLayer = $"../../../TileMapLayers/TileMapLayerSelected"
+@onready var sprite_2d_selected: Sprite2D = $Sprite2dSelected
+@onready var sprite_2d_moved: Sprite2D = $Sprite2dMoved
+@onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
+@onready var select_sound: AudioStreamPlayer2D = $SelectSound
+@onready var confirm_sound: AudioStreamPlayer2D = $ConfirmSound
+@onready var turn_manager: Node = $"../../../TurnManager"
 
-var selected := false
+const SPEED = 300
 
-func _ready():
-	grid_pos = get_grid_position()
-	
+#unit variables
+var is_turn = true
+var has_moved = false
+var is_player_selected = false
+var team : String
+#tile variables
+var clicked_tile : Vector2i
+var tile_occupied = false
+var tile_in_bounds = false
 
-func get_grid_position():
-	var tilemap = get_tree().get_root().get_node("Main/TileMapLayer")
-	return tilemap.local_to_map(global_position)
+#on start put selection sprites in right state
+func _ready() -> void:
+	sprite_2d_moved.visible = false
+	sprite_2d_selected.visible = false
+	#check which team this unit is in 
+	check_team()
+	if team == "red":
+		is_turn = false
+		animated_sprite_2d.modulate = Color(1, 0.3, 0)       # Red
+		animated_sprite_2d.scale.x = -1  # Flipped
 
-func move_to(tile_pos: Vector2i):
-	var tilemap = get_tree().get_root().get_node("Main/TileMapLayer")
-	var world_pos = tilemap.map_to_local(tile_pos)
-	global_position = world_pos
-	grid_pos = tile_pos
+
+#input recognition functions:
+
+# Called when selecting this unit's Area2D
+func _on_clicked_area_input_event(viewport: Node, event: InputEvent, shape_idx: int) -> void:
+	if event.is_action_pressed("leftClick"):
+		
+		#checks + change variables and play sound: this unit is selected
+		if is_turn && !has_moved && !is_player_selected && !other_unit_selected():
+			is_player_selected = true
+			sprite_2d_moved.visible = false
+			sprite_2d_selected.visible = true
+			select_sound.play()
+			clicked_tile = tile_map_layer_selected.local_to_map(get_global_mouse_position())
+			print("\nSelected unit on tile: " + str(clicked_tile))
+			# Deselect all other units
+			if team == "blue":
+				for unit in get_tree().get_nodes_in_group("BlueGroup"):
+					unit.deselect()
+			else:
+				for unit in get_tree().get_nodes_in_group("RedGroup"):
+					unit.deselect()
+
+
+
+
+# Handles left mouse clicks on the map after selection for movement
+func _unhandled_input(event):
+	if is_turn && is_player_selected && event.is_action_pressed("leftClick"):
+		clicked_tile = tile_map_layer_selected.local_to_map(get_global_mouse_position())
+		
+		#check if the clicked position already contains a unit or is out of bounds
+		if !is_tile_occupied(clicked_tile) && is_tile_in_bounds(clicked_tile):
+			move_pos(clicked_tile)
+			is_player_selected = false
+			has_moved = true
+			is_turn = false
+			sprite_2d_selected.visible = false
+			sprite_2d_moved.visible = true
+			#call turn manager script to let it know a unit of this team has moved
+			if team == "blue":
+				turn_manager.unit_set_move("blue")
+			else:
+				turn_manager.unit_set_move("red")
+
+			
+		#if the tile is already taken/out of bounds the selected unit will be deselected
+		else:
+			self.deselect()
+
+
+
+
+#methods that input functions use:
+
+# Move unit to grid tile if valid tile
+func move_pos(tile: Vector2i):
+	global_position = tile_map_layer_selected.map_to_local(tile)
+	confirm_sound.play()
+	print("unit moved to tile: " + str(tile))
+	#self.deselect()
+
+# Check if target tile is already occupied
+func is_tile_occupied(tile_pos: Vector2i) -> bool:
+	return false
+
+# Check if tile is in bounds and return a fitting value
+func is_tile_in_bounds(tile_pos: Vector2i) -> bool:
+	#check if given position is inside the tile grid
+	if tile_pos.x >= tile_map_layer_selected.x_offset && tile_pos.x < tile_map_layer_selected.x_offset + tile_map_layer_selected.grid_width \
+	&& tile_pos.y >= tile_map_layer_selected.y_offset && tile_pos.y < tile_map_layer_selected.y_offset + tile_map_layer_selected.grid_height:
+		#print("tile is in bounds")
+		return true
+	else:
+		#print("tile is out of bounds")
+		return false
+		
+
+func other_unit_selected() -> bool:
+	for unit in get_tree().get_nodes_in_group("PlayerGroup"):
+		if unit.is_player_selected == true:
+			print("Other unit already selected")
+			return true
+	return false
+
+#checks which parent node this unit has for team assignment and change vars accordingly
+func check_team():
+	if str(get_parent()) == "BlueGroup:<Node2D#36893099724>":
+		self.team = "blue"
+	if str(get_parent()) == "RedGroup:<Node2D#37849401093>":
+		self.team = "red"
+
+# Deselect this unit
+func deselect():
+	print("Unit deselected")
+	has_moved = false
+	is_player_selected = false
+	sprite_2d_moved.visible = false
+	sprite_2d_selected.visible = false
+
+#gets called every new turn to refresh the unit variables
+func new_turn():
+	print("starts a new turn!")
+	is_turn = true
+	has_moved = false
+	is_player_selected = false
+	tile_occupied = false
+	tile_in_bounds = false
+	sprite_2d_moved.visible = false
+	sprite_2d_selected.visible = false

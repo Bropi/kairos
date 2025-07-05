@@ -1,0 +1,8 @@
+[gd_scene load_steps=2 format=3 uid="uid://cupl5hwa7ys2a"]
+
+[ext_resource type="AudioStream" uid="uid://bojr80d4vxlve" path="res://Assets/Music/Kairos main theme.wav" id="1_fbmny"]
+
+[node name="Music" type="AudioStreamPlayer2D"]
+stream = ExtResource("1_fbmny")
+autoplay = true
+bus = &"Music"
