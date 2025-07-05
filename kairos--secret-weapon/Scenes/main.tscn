@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://d0r7lel36qx0w" path="res://Assets/Tiles/SelectedTiles.png" id="2_jjvhh"]
 [ext_resource type="Script" uid="uid://sw4law8b77sm" path="res://Scripts/tile_map_layer_selected.gd" id="3_jjvhh"]
 [ext_resource type="Script" uid="uid://cvnodahisu2qt" path="res://Scripts/unit_manager.gd" id="4_21xkr"]
-[ext_resource type="PackedScene" uid="uid://uub8wfdmjac5" path="res://Scenes/player_unit.tscn" id="4_jjvhh"]
+[ext_resource type="PackedScene" uid="uid://uub8wfdmjac5" path="res://Scenes/player_unit.tscn" id="5_21xkr"]
 [ext_resource type="Script" uid="uid://dlnns2dm4mtf6" path="res://Scripts/turn_manager.gd" id="7_6bp64"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_ig7tw"]
@@ -360,30 +360,62 @@ script = ExtResource("4_21xkr")
 
 [node name="BlueGroup" type="Node2D" parent="UnitManager"]
 
-[node name="PlayerUnit" parent="UnitManager/BlueGroup" instance=ExtResource("4_jjvhh")]
-position = Vector2(202, 363)
+[node name="Player1Unit" parent="UnitManager/BlueGroup" instance=ExtResource("5_21xkr")]
+position = Vector2(203, 121)
 
-[node name="PlayerUnit2" parent="UnitManager/BlueGroup" instance=ExtResource("4_jjvhh")]
-position = Vector2(204, 608)
+[node name="Player1Unit4" parent="UnitManager/BlueGroup" instance=ExtResource("5_21xkr")]
+position = Vector2(204, 365)
 
-[node name="PlayerUnit3" parent="UnitManager/BlueGroup" instance=ExtResource("4_jjvhh")]
-position = Vector2(202, 770)
+[node name="Player1Unit5" parent="UnitManager/BlueGroup" instance=ExtResource("5_21xkr")]
+position = Vector2(203, 607)
 
-[node name="PlayerUnit4" parent="UnitManager/BlueGroup" instance=ExtResource("4_jjvhh")]
-position = Vector2(202, 202)
+[node name="Player1Unit8" parent="UnitManager/BlueGroup" instance=ExtResource("5_21xkr")]
+position = Vector2(204, 851)
 
 [node name="RedGroup" type="Node2D" parent="UnitManager"]
 
-[node name="Player1Unit" parent="UnitManager/RedGroup" instance=ExtResource("4_jjvhh")]
-position = Vector2(1742, 365)
+[node name="Player1Unit" parent="UnitManager/RedGroup" instance=ExtResource("5_21xkr")]
+position = Vector2(1742, 122)
+team = "red"
 
-[node name="Player1Unit2" parent="UnitManager/RedGroup" instance=ExtResource("4_jjvhh")]
-position = Vector2(1742, 607)
+[node name="Player1Unit2" parent="UnitManager/RedGroup" instance=ExtResource("5_21xkr")]
+position = Vector2(1742, 283)
+team = "red"
+
+[node name="Player1Unit3" parent="UnitManager/RedGroup" instance=ExtResource("5_21xkr")]
+position = Vector2(1742, 690)
+team = "red"
+
+[node name="Player1Unit4" parent="UnitManager/RedGroup" instance=ExtResource("5_21xkr")]
+position = Vector2(1742, 851)
+team = "red"
 
 [node name="TurnManager" type="Node" parent="."]
 script = ExtResource("7_6bp64")
 
 [node name="UI" type="CanvasLayer" parent="."]
+
+[node name="TurnIndicator" type="CanvasLayer" parent="UI"]
+
+[node name="LabelBlue" type="Label" parent="UI/TurnIndicator"]
+visible = false
+offset_left = 600.0
+offset_top = 10.0
+offset_right = 1339.0
+offset_bottom = 79.0
+theme_override_font_sizes/font_size = 50
+text = "Blue  team's  turn"
+uppercase = true
+
+[node name="LabelRed" type="Label" parent="UI/TurnIndicator"]
+visible = false
+offset_left = 600.0
+offset_top = 10.0
+offset_right = 1339.0
+offset_bottom = 79.0
+theme_override_font_sizes/font_size = 50
+text = "REd  team's  turn"
+uppercase = true
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(973, 486)

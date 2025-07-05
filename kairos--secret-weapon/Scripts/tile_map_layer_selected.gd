@@ -35,5 +35,5 @@ func _process(delta):
 
 
 func is_tile_inside_bounds(tile: Vector2i) -> bool:
-	return tile.x >= x_offset and tile.x < x_offset + grid_width and \
-		   tile.y >= y_offset and tile.y < y_offset + grid_height
+	return tile.x >= x_offset && tile.x < x_offset + grid_width && \
+		   tile.y >= y_offset && tile.y < y_offset + grid_height

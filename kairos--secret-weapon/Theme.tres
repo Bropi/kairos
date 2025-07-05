@@ -1,0 +1,6 @@
+[gd_resource type="Theme" load_steps=2 format=3 uid="uid://drpwvp1e2kfm2"]
+
+[ext_resource type="FontFile" uid="uid://gotiux2eog8q" path="res://Assets/Fonts/BwahhRegular-0rKo.ttf" id="1_yd3fu"]
+
+[resource]
+default_font = ExtResource("1_yd3fu")

@@ -312,7 +312,7 @@ shape = SubResource("RectangleShape2D_amyjt")
 shape = SubResource("RectangleShape2D_c4efy")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
-position = Vector2(0, -4)
+position = Vector2(2, -22)
 sprite_frames = SubResource("SpriteFrames_1llvc")
 animation = &"Idle"
 autoplay = "Idle"

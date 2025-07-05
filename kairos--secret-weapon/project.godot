@@ -25,6 +25,11 @@ window/size/viewport_width=1920
 window/size/viewport_height=1080
 window/size/mode=2
 
+[gui]
+
+theme/custom="uid://drpwvp1e2kfm2"
+theme/custom_font="uid://gotiux2eog8q"
+
 [input]
 
 leftClick={

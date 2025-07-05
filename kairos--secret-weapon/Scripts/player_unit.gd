@@ -1,29 +1,40 @@
 extends CharacterBody2D
 
+#other node's scripts:
 @onready var tile_map_layer_selected: TileMapLayer = $"../../../TileMapLayers/TileMapLayerSelected"
+@onready var turn_manager: Node = $"../../../TurnManager"
+@onready var unit_manager: Node2D = $"../../../UnitManager"
+
+#player node's children:
 @onready var sprite_2d_selected: Sprite2D = $Sprite2dSelected
 @onready var sprite_2d_moved: Sprite2D = $Sprite2dMoved
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
 @onready var select_sound: AudioStreamPlayer2D = $SelectSound
 @onready var confirm_sound: AudioStreamPlayer2D = $ConfirmSound
-@onready var turn_manager: Node = $"../../../TurnManager"
-
-const SPEED = 300
 
 #unit variables
-var is_turn = true
-var has_moved = false
-var is_player_selected = false
-var team : String
+var is_turn : bool
+var has_moved : bool
+var is_player_selected : bool
+#var team : String
+var unit_location : Vector2i
+@export var team: String = "blue"
+
 #tile variables
 var clicked_tile : Vector2i
-var tile_occupied = false
-var tile_in_bounds = false
+var tile_occupied : bool
+var tile_in_bounds : bool
 
-#on start put selection sprites in right state
+#on start put player vars in right state: team blue starts, team red second
 func _ready() -> void:
+	is_turn = true
+	has_moved = false
+	is_player_selected = false
 	sprite_2d_moved.visible = false
 	sprite_2d_selected.visible = false
+	unit_location = tile_map_layer_selected.local_to_map(global_position)
+	tile_occupied = false
+	
 	#check which team this unit is in 
 	check_team()
 	if team == "red":
@@ -70,13 +81,13 @@ func _unhandled_input(event):
 			is_turn = false
 			sprite_2d_selected.visible = false
 			sprite_2d_moved.visible = true
+			unit_manager.update_unit_positions()
 			#call turn manager script to let it know a unit of this team has moved
 			if team == "blue":
 				turn_manager.unit_set_move("blue")
 			else:
 				turn_manager.unit_set_move("red")
-
-			
+				
 		#if the tile is already taken/out of bounds the selected unit will be deselected
 		else:
 			self.deselect()
@@ -95,7 +106,8 @@ func move_pos(tile: Vector2i):
 
 # Check if target tile is already occupied
 func is_tile_occupied(tile_pos: Vector2i) -> bool:
-	return false
+	tile_occupied = unit_manager.is_tile_occupied(self.team, tile_pos)
+	return tile_occupied
 
 # Check if tile is in bounds and return a fitting value
 func is_tile_in_bounds(tile_pos: Vector2i) -> bool:
@@ -123,6 +135,10 @@ func check_team():
 	if str(get_parent()) == "RedGroup:<Node2D#37849401093>":
 		self.team = "red"
 
+#get team func for unit manager
+func get_team():
+	return team
+
 # Deselect this unit
 func deselect():
 	print("Unit deselected")
@@ -137,7 +153,6 @@ func new_turn():
 	is_turn = true
 	has_moved = false
 	is_player_selected = false
-	tile_occupied = false
-	tile_in_bounds = false
 	sprite_2d_moved.visible = false
 	sprite_2d_selected.visible = false
+	unit_location = tile_map_layer_selected.local_to_map(global_position)
