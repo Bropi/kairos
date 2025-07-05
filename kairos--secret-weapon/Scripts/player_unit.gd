@@ -9,8 +9,11 @@ extends CharacterBody2D
 @onready var sprite_2d_selected: Sprite2D = $Sprite2dSelected
 @onready var sprite_2d_moved: Sprite2D = $Sprite2dMoved
 @onready var animated_sprite_2d: AnimatedSprite2D = $AnimatedSprite2D
-@onready var select_sound: AudioStreamPlayer2D = $SelectSound
-@onready var confirm_sound: AudioStreamPlayer2D = $ConfirmSound
+@onready var select_sound: AudioStreamPlayer2D = $Node2D/SelectSound
+@onready var confirm_sound: AudioStreamPlayer2D = $Node2D/ConfirmSound
+@onready var error_sound: AudioStreamPlayer2D = $Node2D/ErrorSound
+@onready var hover_sound: AudioStreamPlayer2D = $Node2D/HoverSound
+
 
 #unit variables
 var is_turn : bool
@@ -18,7 +21,14 @@ var has_moved : bool
 var is_player_selected : bool
 #var team : String
 var unit_location : Vector2i
-@export var team: String = "blue"
+@export var team: String
+
+#unit combat stats
+@export var unit_type: String
+@export var health: int
+@export var damage: int
+@export var attack_range: int
+@export var walking_range: int
 
 #tile variables
 var clicked_tile : Vector2i
@@ -41,6 +51,9 @@ func _ready() -> void:
 		is_turn = false
 		animated_sprite_2d.modulate = Color(1, 0.3, 0)       # Red
 		animated_sprite_2d.scale.x = -1  # Flipped
+		
+	#assign combat stats after verifying what kind of unit the player is
+	#use another func for this
 
 
 #input recognition functions:
@@ -57,22 +70,21 @@ func _on_clicked_area_input_event(viewport: Node, event: InputEvent, shape_idx: 
 			select_sound.play()
 			clicked_tile = tile_map_layer_selected.local_to_map(get_global_mouse_position())
 			print("\nSelected unit on tile: " + str(clicked_tile))
-			# Deselect all other units
-			if team == "blue":
-				for unit in get_tree().get_nodes_in_group("BlueGroup"):
-					unit.deselect()
-			else:
-				for unit in get_tree().get_nodes_in_group("RedGroup"):
-					unit.deselect()
+			
+		#elif !is_turn && !is_player_selected:
+			#error_sound.play()
+
 
 
 
 
 # Handles left mouse clicks on the map after selection for movement
 func _unhandled_input(event):
+	
 	if is_turn && is_player_selected && event.is_action_pressed("leftClick"):
 		clicked_tile = tile_map_layer_selected.local_to_map(get_global_mouse_position())
-		
+
+					
 		#check if the clicked position already contains a unit or is out of bounds
 		if !is_tile_occupied(clicked_tile) && is_tile_in_bounds(clicked_tile):
 			move_pos(clicked_tile)
@@ -90,8 +102,9 @@ func _unhandled_input(event):
 				
 		#if the tile is already taken/out of bounds the selected unit will be deselected
 		else:
+			error_sound.play()
 			self.deselect()
-
+		
 
 
 

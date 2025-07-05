@@ -32,6 +32,7 @@ func _ready() -> void:
 		#red_unit_positions.append(unit_tile_pos)
 		#print(unit_tile_pos)
 
+#update unit positions, called from units
 func update_unit_positions():
 	blue_unit_positions.clear()
 	red_unit_positions.clear()
@@ -40,15 +41,14 @@ func update_unit_positions():
 
 	# Search all units in both groups
 	for unit in blue_group.get_children() + red_group.get_children():
-		if unit.has_method("get_team"):
-			var unit_tile_pos = tile_map_layer_selected.local_to_map(unit.global_position)
+		var unit_tile_pos = tile_map_layer_selected.local_to_map(unit.global_position)
 
-			if unit.team == "blue":
-				blue_unit_positions.append(unit_tile_pos)
-			elif unit.team == "red":
-				red_unit_positions.append(unit_tile_pos)
-				
-			print(unit.name, " → ", unit.team, " at ", unit_tile_pos)
+		if unit.team == "blue":
+			blue_unit_positions.append(unit_tile_pos)
+		elif unit.team == "red":
+			red_unit_positions.append(unit_tile_pos)
+			
+		#print(unit.name, " → ", unit.team, " at ", unit_tile_pos)
 
 #Used by player nodes to check other tile positions for occupation
 func is_tile_occupied(team: String, target_tile: Vector2i) -> bool:

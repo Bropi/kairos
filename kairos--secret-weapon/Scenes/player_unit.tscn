@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=3 uid="uid://uub8wfdmjac5"]
+[gd_scene load_steps=48 format=3 uid="uid://uub8wfdmjac5"]
 
 [ext_resource type="Script" uid="uid://c2s534ui0tdck" path="res://Scripts/player_unit.gd" id="1_amyjt"]
 [ext_resource type="Texture2D" uid="uid://ddyhoa1vqigt0" path="res://icon.svg" id="1_wgahf"]
@@ -6,6 +6,8 @@
 [ext_resource type="Texture2D" uid="uid://blkpdkyo0opkw" path="res://Assets/CharacterSpriteSheets/KairosTroopSpriteSheet.png" id="4_tlcot"]
 [ext_resource type="AudioStream" uid="uid://dbary7b7tp7j4" path="res://Assets/SFX/select-sound-121244.mp3" id="5_k317j"]
 [ext_resource type="AudioStream" uid="uid://dvlmhvfn1q56c" path="res://Assets/SFX/button-click-289742.mp3" id="6_6xtnc"]
+[ext_resource type="AudioStream" uid="uid://conxiyepw4ott" path="res://Assets/SFX/error-call-to-attention-129258.mp3" id="7_4kgfg"]
+[ext_resource type="AudioStream" uid="uid://bht4gptydwfrm" path="res://Assets/SFX/hoversound2.mp3" id="8_lmrti"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_amyjt"]
 size = Vector2(70, 68)
@@ -329,10 +331,19 @@ text = "Player"
 horizontal_alignment = 1
 metadata/_edit_use_anchors_ = true
 
-[node name="SelectSound" type="AudioStreamPlayer2D" parent="."]
+[node name="Node2D" type="Node2D" parent="."]
+
+[node name="SelectSound" type="AudioStreamPlayer2D" parent="Node2D"]
 stream = ExtResource("5_k317j")
 
-[node name="ConfirmSound" type="AudioStreamPlayer2D" parent="."]
+[node name="ConfirmSound" type="AudioStreamPlayer2D" parent="Node2D"]
 stream = ExtResource("6_6xtnc")
+
+[node name="ErrorSound" type="AudioStreamPlayer2D" parent="Node2D"]
+stream = ExtResource("7_4kgfg")
+
+[node name="HoverSound" type="AudioStreamPlayer2D" parent="Node2D"]
+stream = ExtResource("8_lmrti")
+bus = &"HoverSound"
 
 [connection signal="input_event" from="ClickedArea" to="." method="_on_clicked_area_input_event"]

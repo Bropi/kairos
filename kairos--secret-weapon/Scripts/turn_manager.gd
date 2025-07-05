@@ -8,6 +8,8 @@ extends Node
 #turn indicator UI nodes' references
 @onready var label_blue: Label = $"../UI/TurnIndicator/LabelBlue"
 @onready var label_red: Label = $"../UI/TurnIndicator/LabelRed"
+@onready var turn_indicator: ColorRect = $"../TurnIndicator"
+@onready var new_turn_sound: AudioStreamPlayer2D = $NewTurnSound
 
 #turn manager variables
 var blue_team_members : int
@@ -56,6 +58,7 @@ func turn_over(team: String):
 		
 	#updates all unit positions in the unit manager and turn indicators
 	update_turn_indicator(team)
+	new_turn_sound.play()
 	unit_manager.update_unit_positions()
 	print("All units have moved in team: " + team)
 	
@@ -72,8 +75,10 @@ func update_turn_indicator(team: String):
 	if team == "blue":
 		label_blue.visible = false
 		label_red.visible = true
+		turn_indicator.color = Color(0.7, 0.15, 0.05)
 	else: #team = red
 		label_blue.visible = true
 		label_red.visible = false
+		turn_indicator.color = Color(0.0, 0.353, 0.494)
 
 #make function to remove team member size if a unit is defeated
