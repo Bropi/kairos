@@ -62,45 +62,80 @@ func _process(delta):
 #tile grid manipulation functions:
 
 #gets called from player unit's move selection
+#func check_surrounding_tiles(selected_tile: Vector2i, radius: int):
+	#unit_selected = true
+	#checked_tile = selected_tile
+	#
+	## Define the 8 surrounding directions (radius = 1)
+	#offsets = [
+		#Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1),
+		#Vector2i(-1,  0),                 Vector2i(1,  0),
+		#Vector2i(-1,  1), Vector2i(0,  1), Vector2i(1,  1)
+	#]
+	## Clear previous selected tiles dictionary
+	#dic_selected.clear()
+	##highlight available tiles and add offsets to dic_selected dictionary
+	#highlight_movement_zone()
+
 func check_surrounding_tiles(selected_tile: Vector2i, radius: int):
 	unit_selected = true
 	checked_tile = selected_tile
-	
-	# Define the 8 surrounding directions (radius = 1)
-	offsets = [
-		Vector2i(-1, -1), Vector2i(0, -1), Vector2i(1, -1),
-		Vector2i(-1,  0),                 Vector2i(1,  0),
-		Vector2i(-1,  1), Vector2i(0,  1), Vector2i(1,  1)
-	]
-	# Clear previous selected tiles dictionary
 	dic_selected.clear()
-	#highlight available tiles and add offsets to dic_selected dictionary
+	offsets.clear()
+
+	# Generate dynamic offsets based on radius
+	for dx in range(-radius, radius + 1):
+		for dy in range(-radius, radius + 1):
+			var offset = Vector2i(dx, dy)
+			if offset == Vector2i(0, 0):  # Skip center tile
+				continue
+			offsets.append(offset)
+
+	# Now call the actual movement zone highlighter
 	highlight_movement_zone()
 
 
+
 #Highlight surrounding tiles where unit can go after selecting it
+#func highlight_movement_zone():
+	#var occupied = false
+##Loop through offsets and calculate surrounding tiles
+	#for offset in offsets:
+		##ask unit manager script without team flag if the tile is occupied
+		##if the tile is occupied the func will return "none"
+		#var surrounding_tile = checked_tile + offset
+		#if unit_manager.is_tile_occupied("another", surrounding_tile) == "none":
+			#occupied = false
+		#else:
+			#occupied = true
+		#
+		#if is_tile_inside_bounds(surrounding_tile) && !occupied:
+			##print("Surrounding tile:", surrounding_tile)
+			## Highlight tile purple for movement zone
+			#tile_map_layer_selected.set_cell(surrounding_tile, 1, Vector2i(3, 4), 0)   
+			#dic_selected[str(surrounding_tile)] = {
+				#"Type": "offset",
+				#"Position": str(surrounding_tile)
+			#}
+			
 func highlight_movement_zone():
 	var occupied = false
-#Loop through offsets and calculate surrounding tiles
+
 	for offset in offsets:
-		#ask unit manager script without team flag if the tile is occupied
-		#if the tile is occupied the func will return "none"
 		var surrounding_tile = checked_tile + offset
+
 		if unit_manager.is_tile_occupied("another", surrounding_tile) == "none":
 			occupied = false
 		else:
 			occupied = true
-		
-		if is_tile_inside_bounds(surrounding_tile) && !occupied:
-			#print("Surrounding tile:", surrounding_tile)
-			# Highlight tile purple for movement zone
-			tile_map_layer_selected.set_cell(surrounding_tile, 1, Vector2i(3, 4), 0)   
+
+		if is_tile_inside_bounds(surrounding_tile) and not occupied:
+			tile_map_layer_selected.set_cell(surrounding_tile, 1, Vector2i(3, 4), 0)
 			dic_selected[str(surrounding_tile)] = {
 				"Type": "offset",
 				"Position": str(surrounding_tile)
 			}
-			
-			
+
 
 func clear_highlights():
 	# Clear previous highlights (only within the grid)

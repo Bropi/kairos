@@ -25,10 +25,10 @@ var unit_location : Vector2i
 
 #unit combat stats
 @export var unit_type: String
-@export var health: int
-@export var damage: int
-@export var attack_range: int
-@export var walking_range: int
+@export var health: int = 1
+@export var damage: int = 1
+@export var attack_range: int = 2
+@export var walking_range: int = 2
 
 #tile variables
 var clicked_tile : Vector2i
@@ -54,6 +54,7 @@ func _ready() -> void:
 		animated_sprite_2d.modulate = Color(1, 0.3, 0)       # Red
 		animated_sprite_2d.scale.x = -1  # Flipped
 		
+	update_unit_stats(unit_type)
 	#assign combat stats after verifying what kind of unit the player is
 	#use another func for this
 
@@ -74,7 +75,7 @@ func _on_clicked_area_input_event(viewport: Node, event: InputEvent, shape_idx: 
 			print("\nSelected unit on tile: " + str(clicked_tile))
 			#update tile grid script:
 			tile_map_layer_selected.unit_selected = true
-			tile_map_layer_selected.check_surrounding_tiles(clicked_tile, 2)
+			tile_map_layer_selected.check_surrounding_tiles(clicked_tile, walking_range)
 			
 		#elif !is_turn && !is_player_selected:
 			#error_sound.play()
@@ -193,7 +194,12 @@ func new_turn():
 	
 	
 #combat functions
-
+func update_unit_stats(unit_type : String):
+	health = 1
+	damage = 1
+	attack_range = 2
+	walking_range = 2
+	
 
 
 #pathfinding functions
