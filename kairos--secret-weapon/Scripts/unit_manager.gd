@@ -13,7 +13,7 @@ var unit_tile_pos: Vector2i
 #function variables:
 #is_tile_occupied:
 var tile_pos : Vector2i
-var occupied : bool
+var occupied : String
 
 func _ready() -> void:
 	update_unit_positions()
@@ -51,19 +51,13 @@ func update_unit_positions():
 		#print(unit.name, " → ", unit.team, " at ", unit_tile_pos)
 
 #Used by player nodes to check other tile positions for occupation
-func is_tile_occupied(team: String, target_tile: Vector2i) -> bool:
-	var occupied = false
+func is_tile_occupied(team: String, target_tile: Vector2i) -> String:
+	var occupied = "none"
 	
-	for tile_pos in blue_unit_positions:
+	for tile_pos in blue_unit_positions + red_unit_positions:
 		if tile_pos == target_tile:
-			occupied = true
-			print("tile is occupied by ally unit")
-			break  # optional to stop early
-			
-	for tile_pos in red_unit_positions:
-		if tile_pos == target_tile:
-			occupied = true
-			print("tile is occupied by enemy unit")
+			occupied = team
+			#print("tile is occupied by a " + team + " unit")
 			break
-				
+	
 	return occupied

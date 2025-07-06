@@ -34,6 +34,8 @@ var unit_location : Vector2i
 var clicked_tile : Vector2i
 var tile_occupied : bool
 var tile_in_bounds : bool
+var tile_in_unit_range : bool
+
 
 #on start put player vars in right state: team blue starts, team red second
 func _ready() -> void:
@@ -70,6 +72,9 @@ func _on_clicked_area_input_event(viewport: Node, event: InputEvent, shape_idx: 
 			select_sound.play()
 			clicked_tile = tile_map_layer_selected.local_to_map(get_global_mouse_position())
 			print("\nSelected unit on tile: " + str(clicked_tile))
+			#update tile grid script:
+			tile_map_layer_selected.unit_selected = true
+			tile_map_layer_selected.check_surrounding_tiles(clicked_tile, 2)
 			
 		#elif !is_turn && !is_player_selected:
 			#error_sound.play()
@@ -83,10 +88,11 @@ func _unhandled_input(event):
 	
 	if is_turn && is_player_selected && event.is_action_pressed("leftClick"):
 		clicked_tile = tile_map_layer_selected.local_to_map(get_global_mouse_position())
-
-					
+		
+		#check with tilemap script if selected tile is within unit's walking range:
+		tile_in_unit_range = tile_map_layer_selected.dic_selected.has(str(clicked_tile))
 		#check if the clicked position already contains a unit or is out of bounds
-		if !is_tile_occupied(clicked_tile) && is_tile_in_bounds(clicked_tile):
+		if !is_tile_occupied(clicked_tile) && is_tile_in_bounds(clicked_tile) && tile_in_unit_range:
 			move_pos(clicked_tile)
 			is_player_selected = false
 			has_moved = true
@@ -99,16 +105,23 @@ func _unhandled_input(event):
 				turn_manager.unit_set_move("blue")
 			else:
 				turn_manager.unit_set_move("red")
-				
+			#deselect highlighted tiles in tilemap layer script
+			tile_map_layer_selected.dic_selected.clear()
+			tile_map_layer_selected.unit_selected = false
+			tile_map_layer_selected.clear_highlights()
+			
 		#if the tile is already taken/out of bounds the selected unit will be deselected
 		else:
+			tile_map_layer_selected.dic_selected.clear()
+			tile_map_layer_selected.unit_selected = false
+			tile_map_layer_selected.clear_highlights()
 			error_sound.play()
 			self.deselect()
 		
 
 
 
-#methods that input functions use:
+#methods that input functions use for selection and movement:
 
 # Move unit to grid tile if valid tile
 func move_pos(tile: Vector2i):
@@ -119,7 +132,14 @@ func move_pos(tile: Vector2i):
 
 # Check if target tile is already occupied
 func is_tile_occupied(tile_pos: Vector2i) -> bool:
-	tile_occupied = unit_manager.is_tile_occupied(self.team, tile_pos)
+	#this var is for later combat implementation
+	var occupier = "none"
+	tile_occupied = false
+	
+	if unit_manager.is_tile_occupied(self.team, tile_pos) == "blue"\
+	or unit_manager.is_tile_occupied(self.team, tile_pos) == "red":
+		tile_occupied = true
+		
 	return tile_occupied
 
 # Check if tile is in bounds and return a fitting value
@@ -169,3 +189,12 @@ func new_turn():
 	sprite_2d_moved.visible = false
 	sprite_2d_selected.visible = false
 	unit_location = tile_map_layer_selected.local_to_map(global_position)
+	
+	
+	
+#combat functions
+
+
+
+#pathfinding functions
+ 
