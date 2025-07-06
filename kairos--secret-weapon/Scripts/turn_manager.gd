@@ -4,6 +4,7 @@ extends Node
 @onready var blue_group: Node2D = $"../UnitManager/BlueGroup"
 @onready var red_group: Node2D = $"../UnitManager/RedGroup"
 @onready var unit_manager: Node2D = $"../UnitManager"
+@onready var main: Node2D = $".."
 
 #turn indicator UI nodes' references
 @onready var label_blue: Label = $"../UI/TurnIndicator/LabelBlue"
@@ -81,4 +82,20 @@ func update_turn_indicator(team: String):
 		label_red.visible = false
 		turn_indicator.color = Color(0.0, 0.353, 0.494)
 
-#make function to remove team member size if a unit is defeated
+#function to remove team member size if a unit is defeated
+func unit_died(team: String):
+	if team == "blue":
+		blue_team_members -= 1
+		print (blue_team_members)
+	else:
+		red_team_members -= 1
+		print (red_team_members)
+	
+	if blue_team_members == 0 or red_team_members == 0:
+		print("game over")
+		restart_scene()
+		
+		
+func restart_scene():
+	var scene_path = "res://Scenes/main.tscn"  # Replace with your actual scene path
+	get_tree().change_scene_to_file(scene_path)

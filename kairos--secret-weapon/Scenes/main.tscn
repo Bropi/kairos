@@ -365,7 +365,7 @@ script = ExtResource("4_21xkr")
 [node name="BlueGroup" type="Node2D" parent="UnitManager"]
 
 [node name="Player1Unit" parent="UnitManager/BlueGroup" instance=ExtResource("5_21xkr")]
-position = Vector2(202, 445)
+position = Vector2(1580, 364)
 team = "blue"
 
 [node name="Player1Unit2" parent="UnitManager/BlueGroup" instance=ExtResource("5_21xkr")]

@@ -75,7 +75,7 @@ func _on_clicked_area_input_event(viewport: Node, event: InputEvent, shape_idx: 
 			print("\nSelected unit on tile: " + str(clicked_tile))
 			#update tile grid script:
 			tile_map_layer_selected.unit_selected = true
-			tile_map_layer_selected.check_surrounding_tiles(clicked_tile, walking_range)
+			tile_map_layer_selected.check_surrounding_tiles(clicked_tile, walking_range, team)
 			
 		#elif !is_turn && !is_player_selected:
 			#error_sound.play()
@@ -91,33 +91,55 @@ func _unhandled_input(event):
 		clicked_tile = tile_map_layer_selected.local_to_map(get_global_mouse_position())
 		
 		#check with tilemap script if selected tile is within unit's walking range:
-		tile_in_unit_range = tile_map_layer_selected.dic_selected.has(str(clicked_tile))
+		var tile_data = tile_map_layer_selected.dic_selected.get(str(clicked_tile), null)
+		var tile_in_unit_range = false
+
+		if tile_data:
+			var tile_type = tile_data.get("Type", "")
+			tile_in_unit_range = tile_type == "walkable" or tile_type == "enemy"
+
+
 		#check if the clicked position already contains a unit or is out of bounds
-		if !is_tile_occupied(clicked_tile) && is_tile_in_bounds(clicked_tile) && tile_in_unit_range:
-			move_pos(clicked_tile)
+		if is_tile_in_bounds(clicked_tile) && tile_in_unit_range:
+			var tile_occupier = unit_manager.is_tile_occupied(self.team, clicked_tile)
+
+			if tile_occupier != self.team && tile_occupier != "none":
+				unit_manager.kill_enemy(team, clicked_tile)
+				unit_manager.update_unit_positions()
+				move_pos(clicked_tile)
+				
+			elif tile_occupier == "none":
+				move_pos(clicked_tile)
+			
+			else:
+				# Tile has friendly unit → do nothing
+				error_sound.play()
+				self.deselect()
+				return
+
+			# After valid move or kill
 			is_player_selected = false
 			has_moved = true
 			is_turn = false
 			sprite_2d_selected.visible = false
 			sprite_2d_moved.visible = true
 			unit_manager.update_unit_positions()
-			#call turn manager script to let it know a unit of this team has moved
+			tile_map_layer_selected.dic_selected.clear()
+			tile_map_layer_selected.unit_selected = false
+			tile_map_layer_selected.clear_highlights()
+
 			if team == "blue":
 				turn_manager.unit_set_move("blue")
 			else:
 				turn_manager.unit_set_move("red")
-			#deselect highlighted tiles in tilemap layer script
-			tile_map_layer_selected.dic_selected.clear()
-			tile_map_layer_selected.unit_selected = false
-			tile_map_layer_selected.clear_highlights()
-			
-		#if the tile is already taken/out of bounds the selected unit will be deselected
+
 		else:
 			tile_map_layer_selected.dic_selected.clear()
 			tile_map_layer_selected.unit_selected = false
 			tile_map_layer_selected.clear_highlights()
 			error_sound.play()
 			self.deselect()
+
 		
 
 
@@ -131,17 +153,14 @@ func move_pos(tile: Vector2i):
 	print("unit moved to tile: " + str(tile))
 	#self.deselect()
 
-# Check if target tile is already occupied
+# Check if target tile is already occupied by ally unit
 func is_tile_occupied(tile_pos: Vector2i) -> bool:
-	#this var is for later combat implementation
-	var occupier = "none"
-	tile_occupied = false
+	var tile_occupier = unit_manager.is_tile_occupied(self.team, tile_pos)
+	var tile_occupied = tile_occupier == self.team
 	
-	if unit_manager.is_tile_occupied(self.team, tile_pos) == "blue"\
-	or unit_manager.is_tile_occupied(self.team, tile_pos) == "red":
-		tile_occupied = true
-		
+	print(tile_occupier)
 	return tile_occupied
+
 
 # Check if tile is in bounds and return a fitting value
 func is_tile_in_bounds(tile_pos: Vector2i) -> bool:
@@ -200,7 +219,9 @@ func update_unit_stats(unit_type : String):
 	attack_range = 2
 	walking_range = 2
 	
-
+func die():
+	self.queue_free()
+	turn_manager.unit_died(self.team)
 
 #pathfinding functions
  

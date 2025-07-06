@@ -50,14 +50,23 @@ func update_unit_positions():
 			
 		#print(unit.name, " → ", unit.team, " at ", unit_tile_pos)
 
-#Used by player nodes to check other tile positions for occupation
-func is_tile_occupied(team: String, target_tile: Vector2i) -> String:
-	var occupied = "none"
-	
-	for tile_pos in blue_unit_positions + red_unit_positions:
+# Used by player nodes to check other tile positions for occupation
+func is_tile_occupied(_team: String, target_tile: Vector2i) -> String:
+	for tile_pos in blue_unit_positions:
 		if tile_pos == target_tile:
-			occupied = team
-			#print("tile is occupied by a " + team + " unit")
-			break
-	
-	return occupied
+			return "blue"
+
+	for tile_pos in red_unit_positions:
+		if tile_pos == target_tile:
+			return "red"
+
+	return "none"
+
+
+func kill_enemy(_team: String, target_tile: Vector2i):
+	for unit in blue_group.get_children() + red_group.get_children():
+		var unit_tile = tile_map_layer_selected.local_to_map(unit.global_position)
+		if unit_tile == target_tile:
+			unit.die()
+			print("Killed unit at: ", target_tile)
+			return

@@ -77,22 +77,43 @@ func _process(delta):
 	##highlight available tiles and add offsets to dic_selected dictionary
 	#highlight_movement_zone()
 
-func check_surrounding_tiles(selected_tile: Vector2i, radius: int):
+func check_surrounding_tiles(selected_tile: Vector2i, radius: int, unit_team: String):
 	unit_selected = true
 	checked_tile = selected_tile
 	dic_selected.clear()
 	offsets.clear()
 
-	# Generate dynamic offsets based on radius
 	for dx in range(-radius, radius + 1):
 		for dy in range(-radius, radius + 1):
 			var offset = Vector2i(dx, dy)
-			if offset == Vector2i(0, 0):  # Skip center tile
+			if offset == Vector2i(0, 0):
 				continue
-			offsets.append(offset)
 
-	# Now call the actual movement zone highlighter
+			var target_tile = selected_tile + offset
+
+			if !is_tile_in_bounds(target_tile):
+				continue
+
+			var occupier = unit_manager.is_tile_occupied("none", target_tile)
+			if occupier == "none":
+				dic_selected[str(target_tile)] = {
+					"Type": "walkable",
+					"Position": target_tile
+				}
+				offsets.append(offset)
+			elif occupier != unit_team:
+				dic_selected[str(target_tile)] = {
+					"Type": "enemy",
+					"Position": target_tile
+				}
+				offsets.append(offset)
+
 	highlight_movement_zone()
+
+
+func is_tile_in_bounds(tile_pos: Vector2i) -> bool:
+	return tile_pos.x >= x_offset && tile_pos.x < x_offset + grid_width \
+		&& tile_pos.y >= y_offset && tile_pos.y < y_offset + grid_height
 
 
 
@@ -117,24 +138,19 @@ func check_surrounding_tiles(selected_tile: Vector2i, radius: int):
 				#"Type": "offset",
 				#"Position": str(surrounding_tile)
 			#}
-			
+
+
 func highlight_movement_zone():
-	var occupied = false
+	for key in dic_selected.keys():
+		var tile_data = dic_selected[key]
+		var pos = tile_data["Position"]
+		var tile_type = tile_data["Type"]
 
-	for offset in offsets:
-		var surrounding_tile = checked_tile + offset
+		if tile_type == "walkable":
+			tile_map_layer_selected.set_cell(pos, 1, Vector2i(3, 4), 0)  # Purple
+		elif tile_type == "enemy":
+			tile_map_layer_selected.set_cell(pos, 1, Vector2i(5, 3), 0)  # Red
 
-		if unit_manager.is_tile_occupied("another", surrounding_tile) == "none":
-			occupied = false
-		else:
-			occupied = true
-
-		if is_tile_inside_bounds(surrounding_tile) and not occupied:
-			tile_map_layer_selected.set_cell(surrounding_tile, 1, Vector2i(3, 4), 0)
-			dic_selected[str(surrounding_tile)] = {
-				"Type": "offset",
-				"Position": str(surrounding_tile)
-			}
 
 
 func clear_highlights():
